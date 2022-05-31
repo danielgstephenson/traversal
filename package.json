@@ -1,0 +1,21 @@
+{
+  "name": "traversal",
+  "version": "1.0.0",
+  "description": "intialize using:\r node server.js",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.4.1",
+    "socket.io-adapter": "^2.3.3",
+    "socket.io-parser": "^4.1.2"
+  },
+  "devDependencies": {
+    "standard": "^16.0.4"
+  }
+}
