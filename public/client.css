@@ -9,6 +9,23 @@ body {
 }
 canvas { 
   margin-top: 0vmin;
+  margin-left: vmin;
   border: 0px solid black;
   background: black;
+}
+.notification {
+  width: 100vw;
+  height: 40vh;
+  padding-top: 10vh;
+  font-size: 10vmin;
+  font-size: 8vmin;
+  font-weight: bold;
+  font-family: Tahoma;
+  border: 0px solid white;
+  user-select: none;
+  color: white;
+  margin: 0px;
+  z-index: 9;
+  position: absolute;
+  opacity: 0;
 }

@@ -4,12 +4,21 @@
     <meta charset="utf-8"/>
     <title>Traversal</title>
     <link rel="stylesheet" href="client.css">
+    <link rel="icon" href="circle.ico">
   </head>
   <body style="background-color:#131111;">
-    <canvas id="canvas" width="600" height="600"></canvas>
+    <canvas id="canvas" width="600" height="600"></canvas>    
+    <div id="deathDiv" class="notification"> 
+      <p style="color:rgb(185,0,0)">CORE DESTROYED</p>
+      press space to restart 
+    </div>
+    <div id="levelCompleteDiv" class="notification"> 
+      <p style="color:rgb(200,200,0)">LEVEL COMPLETE</p>
+      press space to continue 
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script> 
-    <script src="pathseg.js"></script>
     <script src="matter.js"></script>
+    <script src="seedrandom.min.js"></script>
     <script src="client.js"></script>
   </body>
 </html>
