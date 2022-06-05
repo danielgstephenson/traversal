@@ -171,6 +171,7 @@ function makeWall (options) {
 
 function makeCore (options) {
   const { x = 0, y = 0 } = options
+  mouse.position = { x: x, y: y }
   const actor = { trail: [], color: { red: 0, green: 220, blue: 255 } }
   const body = Bodies.circle(x, y, 40)
   body.render.fillStyle = getColorString(actor.color)
@@ -194,7 +195,6 @@ function makeGuard (options) {
   body.label = 'guard'
   actor.body = body
   state.guard = actor
-  mouse.position = { x: x, y: y }
   range(trailLength).forEach(i => { actor.trail.push({ x: body.x, y: body.y }) })
   state.actors[body.id] = actor
   state.composites.push(body)
@@ -251,6 +251,7 @@ function updateCore () {
     y: 1 * input.down0 + 1 * input.down1 - 1 * input.up0 - 1 * input.up1
   }
   propel(core.body, direction, 0.005)
+  propelTowards(core.body, mouse.position, 0.005)
   core.trail.pop()
   core.trail.unshift({ x: core.body.position.x, y: core.body.position.y })
 }
