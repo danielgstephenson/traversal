@@ -381,12 +381,16 @@ window.onmousemove = function (e) {
 
 window.onmousedown = function (e) {
   handleMouseEvent(e)
-  state.paused = true
+  if (state.dead) {
+    startLevel()
+  }
+  if (state.levelComplete) {
+    startLevel()
+  }
 }
 
 window.onmouseup = function (e) {
   handleMouseEvent(e)
-  state.paused = false
 }
 
 function handleMouseEvent (e) {
