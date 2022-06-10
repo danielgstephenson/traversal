@@ -8,9 +8,10 @@ body {
   align-items: center;
 }
 canvas { 
-  margin-top: 0vmin;
-  margin-left: vmin;
-  border: 0px solid black;
+  margin: 0vmin;
+  width: 100vmin;
+  height: 100vmin;
+  border: 1px solid white;
   background: black;
 }
 .notification {

@@ -1,13 +1,13 @@
 /* global Matter */
 
 const canvas = document.getElementById('canvas')
-canvas.imageSmoothingEnabled = false
 const deathDiv = document.getElementById('deathDiv')
 const levelCompleteDiv = document.getElementById('levelCompleteDiv')
 
 // Parameters
 const trailLength = 100
 const linearDrag = 0.005
+const timeStep = 1 / 30
 
 // Utility Functions
 const range = n => [...Array(n).keys()]
@@ -329,10 +329,6 @@ Events.on(engine, 'collisionStart', e => {
   })
 })
 
-Events.on(render, 'beforeRender', e => {
-  setupRenderBounds()
-})
-
 Events.on(render, 'afterRender', e => {
   render.context.lineWidth = 2 * state.guard.body.circleRadius
   render.context.lineJoin = 'round'
@@ -408,30 +404,33 @@ function updateMousePosition () {
 }
 
 function setupRenderBounds () {
+  const pixels = 400
+  render.options.width = pixels
+  render.options.height = pixels
+  render.canvas.width = pixels
+  render.canvas.height = pixels
+  render.context.imageSmoothingEnabled = true
   state.scale = Math.exp(-state.zoom)
-  render.bounds.max.x = state.core.body.position.x + state.scale * window.innerWidth / 2
-  render.bounds.max.y = state.core.body.position.y + state.scale * window.innerHeight / 2
-  render.bounds.min.x = state.core.body.position.x - state.scale * window.innerWidth / 2
-  render.bounds.min.y = state.core.body.position.y - state.scale * window.innerHeight / 2
+  const minSize = Math.min(window.innerWidth, window.innerHeight)
+  render.bounds.max.x = state.core.body.position.x + state.scale * minSize / 2
+  render.bounds.max.y = state.core.body.position.y + state.scale * minSize / 2
+  render.bounds.min.x = state.core.body.position.x - state.scale * minSize / 2
+  render.bounds.min.y = state.core.body.position.y - state.scale * minSize / 2
   Render.startViewTransform(render)
-}
-
-function setupCanvas () {
-  render.options.width = window.innerWidth
-  render.options.height = window.innerHeight
-  render.canvas.width = window.innerWidth
-  render.canvas.height = window.innerHeight
-  setupRenderBounds()
 }
 
 function update () {
   if (!state.paused && !state.dead && !state.levelComplete) {
-    Engine.update(engine, 1000 / 60)
+    Engine.update(engine, 1000 * timeStep)
   }
 }
 
+function draw () {
+  setupRenderBounds()
+  Render.world(render)
+  window.requestAnimationFrame(draw)
+}
+
 loadLevel()
-Render.run(render)
-window.addEventListener('resize', setupCanvas)
-setupCanvas()
-setInterval(update, 1000 / 60)
+draw()
+setInterval(update, 1000 * timeStep)
