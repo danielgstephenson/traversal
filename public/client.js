@@ -390,8 +390,13 @@ window.onmouseup = function (e) {
 }
 
 function handleMouseEvent (e) {
-  mouse.absolute.x = (e.x - 0.5 * window.innerWidth)
-  mouse.absolute.y = (e.y - 0.5 * window.innerHeight)
+  const rect = render.canvas.getBoundingClientRect()
+  const center = {
+    x: rect.x + 0.5 * rect.width,
+    y: rect.y + 0.5 * rect.height
+  }
+  mouse.absolute.x = (e.x - center.x)
+  mouse.absolute.y = (e.y - center.y)
   mouse.angle = Math.atan2(mouse.absolute.y, mouse.absolute.x)
   mouse.buttons = e.buttons
   mouse.ready = true
