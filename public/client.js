@@ -5,9 +5,9 @@ const deathDiv = document.getElementById('deathDiv')
 const levelCompleteDiv = document.getElementById('levelCompleteDiv')
 
 // Parameters
-const trailLength = 100
-const linearDrag = 0.005
-const timeStep = 1 / 30
+const trailLength = 40
+const linearDrag = 0.02
+const timeStep = 1 / 60
 
 // Utility Functions
 const range = n => [...Array(n).keys()]
@@ -94,7 +94,7 @@ const state = {
   levelComplete: false,
   dead: false,
   paused: false,
-  zoom: -1.4,
+  zoom: -1.5,
   scale: 1
 }
 
@@ -180,7 +180,7 @@ function makeCore (options) {
   body.label = 'core'
   actor.body = body
   state.core = actor
-  range(trailLength).forEach(i => { actor.trail.push({ x: body.x, y: body.y }) })
+  range(trailLength).forEach(i => { actor.trail.push({ x: body.position.x, y: body.position.y }) })
   state.actors[body.id] = actor
   state.composites.push(body)
 }
@@ -195,7 +195,7 @@ function makeGuard (options) {
   body.label = 'guard'
   actor.body = body
   state.guard = actor
-  range(trailLength).forEach(i => { actor.trail.push({ x: body.x, y: body.y }) })
+  range(trailLength).forEach(i => { actor.trail.push({ x: body.position.x, y: body.position.y }) })
   state.actors[body.id] = actor
   state.composites.push(body)
 }
@@ -246,12 +246,9 @@ Events.on(engine, 'afterUpdate', e => {
 
 function updateCore () {
   const core = state.core
-  const direction = {
-    x: 1 * input.right0 + 1 * input.right1 - 1 * input.left0 - 1 * input.left1,
-    y: 1 * input.down0 + 1 * input.down1 - 1 * input.up0 - 1 * input.up1
-  }
-  propel(core.body, direction, 0.005)
-  propelTowards(core.body, mouse.position, 0.005)
+  const mouseDist = getDist(core.body.position, mouse.position)
+  const tension = 0.01 * clamp(0, 1, getDist(core.body.position, mouse.position) / 2000)
+  if (mouseDist > 4 * core.body.circleRadius) propelTowards(core.body, mouse.position, tension)
   core.trail.pop()
   core.trail.unshift({ x: core.body.position.x, y: core.body.position.y })
 }
@@ -260,7 +257,7 @@ function updateGuard () {
   const guard = state.guard
   const guardPos = guard.body.position
   const corePos = state.core.body.position
-  const tension = 0.005 * clamp(0, 5, getDist(corePos, guardPos) / 1000)
+  const tension = 0.005 * clamp(0, 2, getDist(corePos, guardPos) / 1000)
   propelTowards(guard.body, state.core.body.position, tension)
   guard.trail.pop()
   guard.trail.unshift({ x: guard.body.position.x, y: guard.body.position.y })
@@ -284,14 +281,12 @@ function loadLevel () {
   Math.seedrandom(1)
   makeCore({ x: 0, y: 0 })
   makeGuard({ x: 0, y: 600 })
-  makeHostileWall({ x0: 12000, y0: 1800, x1: 12000, y1: -1800, thickness: 500 })
+  makeHostileWall({ x0: 6000, y0: 1800, x1: 6000, y1: -1800, thickness: 500 })
   makeWall({ x0: -1000, y0: -1800, x1: -1000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
-  makeWall({ x0: -1000, y0: -1800, x1: 16000, y1: -1800, thickness: 1500, step: 500, noise: 100 })
-  makeWall({ x0: -1000, y0: 1800, x1: 16000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
-  makeWall({ x0: 16000, y0: -1800, x1: 16000, y1: 1800, thickness: 1500, step: 500 })
-  makeGoal({ x: 14000, y: 0 })
-  makeGoal({ x: 14000, y: 0 })
-
+  makeWall({ x0: -1000, y0: -1800, x1: 11000, y1: -1800, thickness: 1500, step: 500, noise: 100 })
+  makeWall({ x0: -1000, y0: 1800, x1: 11000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
+  makeWall({ x0: 11000, y0: -1800, x1: 11000, y1: 1800, thickness: 1500, step: 500 })
+  makeGoal({ x: 9000, y: 0 })
   Composite.add(engine.world, state.composites)
 }
 
@@ -330,23 +325,38 @@ Events.on(engine, 'collisionStart', e => {
 })
 
 Events.on(render, 'afterRender', e => {
-  render.context.lineWidth = 2 * state.guard.body.circleRadius
   render.context.lineJoin = 'round'
   render.context.lineCap = 'round'
-  render.context.beginPath()
-  render.context.moveTo(state.guard.trail[0].x, state.guard.trail[0].y)
-  state.guard.trail.forEach((point, i) => {
-    const ratio = 0.005 * (trailLength - i) / trailLength
-    render.context.strokeStyle = getColorString(state.guard.color, ratio)
-    render.context.lineTo(point.x, point.y)
-    render.context.stroke()
-  })
   render.context.lineWidth = 2 * state.core.body.circleRadius
   render.context.beginPath()
   render.context.moveTo(state.core.trail[0].x, state.core.trail[0].y)
+  /*
+  range(trailLength - 1).forEach(i => {
+    const point0 = state.core.trail[i]
+    const point1 = state.core.trail[i + 1]
+    const ratio = (trailLength - i) / trailLength
+    const color0 = getColorString(state.core.color, 0.02 * ratio)
+    const color1 = getColorString(state.core.color, 0)
+    const gradient = render.context.createLinearGradient(point0.x, point0.y, point1.x, point1.y)
+    gradient.addColorStop(0, color0)
+    gradient.addColorStop(1, color1)
+    render.context.strokeStyle = gradient
+    render.context.lineTo(point1.x, point1.y)
+    render.context.stroke()
+  })
+  */
   state.core.trail.forEach((point, i) => {
-    const ratio = 0.005 * (trailLength - i) / trailLength
-    render.context.strokeStyle = getColorString(state.core.color, ratio)
+    const ratio = (trailLength - i) / trailLength
+    render.context.strokeStyle = getColorString(state.core.color, 0.02 * ratio)
+    render.context.lineTo(point.x, point.y)
+    render.context.stroke()
+  })
+  render.context.lineWidth = 2 * state.guard.body.circleRadius
+  render.context.beginPath()
+  render.context.moveTo(state.guard.trail[0].x, state.guard.trail[0].y)
+  state.guard.trail.forEach((point, i) => {
+    const ratio = (trailLength - i) / trailLength
+    render.context.strokeStyle = getColorString(state.guard.color, 0.02 * ratio)
     render.context.lineTo(point.x, point.y)
     render.context.stroke()
   })
@@ -409,24 +419,23 @@ function updateMousePosition () {
 }
 
 function setupRenderBounds () {
-  const pixels = 400
-  render.options.width = pixels
-  render.options.height = pixels
-  render.canvas.width = pixels
-  render.canvas.height = pixels
+  const minSize = Math.min(window.innerWidth, window.innerHeight)
+  render.canvas.width = window.innerWidth
+  render.canvas.height = window.innerHeight
+  render.options.width = render.canvas.width
+  render.options.height = render.canvas.height
   render.context.imageSmoothingEnabled = true
   state.scale = Math.exp(-state.zoom)
-  const minSize = Math.min(window.innerWidth, window.innerHeight)
-  render.bounds.max.x = state.core.body.position.x + state.scale * minSize / 2
-  render.bounds.max.y = state.core.body.position.y + state.scale * minSize / 2
-  render.bounds.min.x = state.core.body.position.x - state.scale * minSize / 2
-  render.bounds.min.y = state.core.body.position.y - state.scale * minSize / 2
+  render.bounds.max.x = state.core.body.position.x + state.scale * render.canvas.width / 2
+  render.bounds.max.y = state.core.body.position.y + state.scale * render.canvas.height / 2
+  render.bounds.min.x = state.core.body.position.x - state.scale * render.canvas.width / 2
+  render.bounds.min.y = state.core.body.position.y - state.scale * render.canvas.height / 2
   Render.startViewTransform(render)
 }
 
 function update () {
   if (!state.paused && !state.dead && !state.levelComplete) {
-    Engine.update(engine, 1000 * timeStep)
+    Engine.update(engine, 1000 / 60)
   }
 }
 

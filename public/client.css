@@ -9,9 +9,9 @@ body {
 }
 canvas { 
   margin: 0vmin;
-  width: 100vmin;
-  height: 100vmin;
-  border: 1px solid white;
+  width: 100vw;
+  height: 100vh;
+  border: 0px solid white;
   background: black;
 }
 .notification {
