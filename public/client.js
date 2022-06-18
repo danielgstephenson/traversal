@@ -37,6 +37,8 @@ function getColorString (color, alpha = 1) {
 // Disable Right Click Menu
 document.oncontextmenu = () => false
 
+window.addEventListener('touchmove', function () {})
+
 // Initialize Matter.js
 const Engine = Matter.Engine
 const Render = Matter.Render
