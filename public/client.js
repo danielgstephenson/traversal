@@ -94,7 +94,7 @@ const state = {
   levelComplete: false,
   dead: false,
   paused: false,
-  zoom: -1.5,
+  zoom: -3,
   scale: 1
 }
 
@@ -383,6 +383,10 @@ window.onwheel = function (e) {
 
 window.onmousemove = function (e) {
   handleMouseEvent(e)
+}
+
+window.ontouchmove = function (e) {
+  e.touches.forEach(touch => handleMouseEvent(touch))
 }
 
 window.onmousedown = function (e) {
