@@ -388,7 +388,7 @@ window.onmousemove = function (e) {
 }
 
 window.ontouchmove = function (e) {
-  e.touches.forEach(touch => handleMouseEvent(touch))
+  e.changedTouches.forEach(touch => handleMouseEvent(touch))
 }
 
 window.onmousedown = function (e) {
