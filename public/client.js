@@ -96,7 +96,7 @@ const state = {
   levelComplete: false,
   dead: false,
   paused: false,
-  zoom: -3,
+  zoom: -2.5,
   scale: 1
 }
 
@@ -249,7 +249,7 @@ Events.on(engine, 'afterUpdate', e => {
 function updateCore () {
   const core = state.core
   const mouseDist = getDist(core.body.position, mouse.position)
-  const tension = 0.01 * clamp(0, 1, getDist(core.body.position, mouse.position) / 2000)
+  const tension = 0.03 * clamp(0, 1, getDist(core.body.position, mouse.position) / 2000)
   if (mouseDist > 4 * core.body.circleRadius) propelTowards(core.body, mouse.position, tension)
   core.trail.pop()
   core.trail.unshift({ x: core.body.position.x, y: core.body.position.y })
@@ -259,7 +259,7 @@ function updateGuard () {
   const guard = state.guard
   const guardPos = guard.body.position
   const corePos = state.core.body.position
-  const tension = 0.005 * clamp(0, 2, getDist(corePos, guardPos) / 1000)
+  const tension = 0.015 * clamp(0, 2, getDist(corePos, guardPos) / 1000)
   propelTowards(guard.body, state.core.body.position, tension)
   guard.trail.pop()
   guard.trail.unshift({ x: guard.body.position.x, y: guard.body.position.y })
