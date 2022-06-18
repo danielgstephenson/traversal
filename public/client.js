@@ -388,6 +388,7 @@ window.onmousemove = function (e) {
 }
 
 window.ontouchmove = function (e) {
+  e.preventDefault()
   // e.changedTouches.forEach(touch => handleMouseEvent(touch))
   handleMouseEvent(e.touches[0])
 }
@@ -412,8 +413,8 @@ function handleMouseEvent (e) {
     x: rect.x + 0.5 * rect.width,
     y: rect.y + 0.5 * rect.height
   }
-  mouse.absolute.x = (e.x - center.x)
-  mouse.absolute.y = (e.y - center.y)
+  mouse.absolute.x = (e.clientX - center.x)
+  mouse.absolute.y = (e.clientY - center.y)
   mouse.angle = Math.atan2(mouse.absolute.y, mouse.absolute.x)
   mouse.buttons = e.buttons
   mouse.ready = true
