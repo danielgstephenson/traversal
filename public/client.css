@@ -9,10 +9,11 @@ body {
 }
 canvas { 
   margin: 0vmin;
-  width: 100vw;
-  height: 100vh;
+  width: 100vmin;
+  height: 100vmin;
   border: 0px solid white;
   background: black;
+  image-rendering: pixelated;
 }
 .notification {
   width: 100vw;

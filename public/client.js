@@ -419,17 +419,16 @@ function updateMousePosition () {
 }
 
 function setupRenderBounds () {
-  const minSize = Math.min(window.innerWidth, window.innerHeight)
-  render.canvas.width = window.innerWidth
-  render.canvas.height = window.innerHeight
+  const minSize = 300 // Math.min(window.innerWidth, window.innerHeight)
+  render.canvas.width = minSize
+  render.canvas.height = minSize
   render.options.width = render.canvas.width
   render.options.height = render.canvas.height
-  render.context.imageSmoothingEnabled = true
   state.scale = Math.exp(-state.zoom)
-  render.bounds.max.x = state.core.body.position.x + state.scale * render.canvas.width / 2
-  render.bounds.max.y = state.core.body.position.y + state.scale * render.canvas.height / 2
-  render.bounds.min.x = state.core.body.position.x - state.scale * render.canvas.width / 2
-  render.bounds.min.y = state.core.body.position.y - state.scale * render.canvas.height / 2
+  render.bounds.max.x = state.core.body.position.x + state.scale * minSize / 2
+  render.bounds.max.y = state.core.body.position.y + state.scale * minSize / 2
+  render.bounds.min.x = state.core.body.position.x - state.scale * minSize / 2
+  render.bounds.min.y = state.core.body.position.y - state.scale * minSize / 2
   Render.startViewTransform(render)
 }
 
