@@ -7,7 +7,7 @@ const levelCompleteDiv = document.getElementById('levelCompleteDiv')
 // Parameters
 const trailLength = 40
 const linearDrag = 0.02
-const timeStep = 1 / 60
+const timeStep = 1 / 24
 
 // Utility Functions
 const range = n => [...Array(n).keys()]
