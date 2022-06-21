@@ -5,7 +5,7 @@ const deathDiv = document.getElementById('deathDiv')
 const levelCompleteDiv = document.getElementById('levelCompleteDiv')
 
 // Parameters
-const trailLength = 40
+const trailLength = 20
 const linearDrag = 0.02
 const timeStep = 1 / 24
 
@@ -57,6 +57,9 @@ render.options.background = 'rgb(0,0,0)'
 render.options.wireframes = false
 render.options.showBounds = false
 render.options.showCollisions = false
+Matter.Render.run(render)
+const runner = Matter.Runner.create()
+Matter.Runner.run(runner, engine)
 
 const controls = [
   { key: 'w', input: 'up0' },
@@ -195,6 +198,7 @@ function makeGuard (options) {
   body.frictionAir = 0
   body.restitution = 0
   body.label = 'guard'
+  //  Matter.Body.setDensity(body, 0.1)
   actor.body = body
   state.guard = actor
   range(trailLength).forEach(i => { actor.trail.push({ x: body.position.x, y: body.position.y }) })
@@ -249,7 +253,7 @@ Events.on(engine, 'afterUpdate', e => {
 function updateCore () {
   const core = state.core
   const mouseDist = getDist(core.body.position, mouse.position)
-  const tension = 0.03 * clamp(0, 1, getDist(core.body.position, mouse.position) / 2000)
+  const tension = 0.01 * clamp(0, 1, getDist(core.body.position, mouse.position) / 2000)
   if (mouseDist > 4 * core.body.circleRadius) propelTowards(core.body, mouse.position, tension)
   core.trail.pop()
   core.trail.unshift({ x: core.body.position.x, y: core.body.position.y })
@@ -259,7 +263,7 @@ function updateGuard () {
   const guard = state.guard
   const guardPos = guard.body.position
   const corePos = state.core.body.position
-  const tension = 0.015 * clamp(0, 2, getDist(corePos, guardPos) / 1000)
+  const tension = 0.05 * clamp(0, 5, getDist(corePos, guardPos) / 1000) ** 2
   propelTowards(guard.body, state.core.body.position, tension)
   guard.trail.pop()
   guard.trail.unshift({ x: guard.body.position.x, y: guard.body.position.y })
@@ -283,13 +287,14 @@ function loadLevel () {
   Math.seedrandom(1)
   makeCore({ x: 0, y: 0 })
   makeGuard({ x: 0, y: 600 })
-  makeHostileWall({ x0: 6000, y0: 1800, x1: 6000, y1: -1800, thickness: 500 })
+  makeHostileWall({ x0: 5000, y0: 1800, x1: 5000, y1: -1800, thickness: 500 })
   makeWall({ x0: -1000, y0: -1800, x1: -1000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
   makeWall({ x0: -1000, y0: -1800, x1: 11000, y1: -1800, thickness: 1500, step: 500, noise: 100 })
-  makeWall({ x0: -1000, y0: 1800, x1: 11000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
-  makeWall({ x0: 11000, y0: -1800, x1: 11000, y1: 1800, thickness: 1500, step: 500 })
-  makeGoal({ x: 9000, y: 0 })
+  makeWall({ x0: -1000, y0: 1800, x1: 9000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
+  makeWall({ x0: 9000, y0: -1800, x1: 9000, y1: 1800, thickness: 1500, step: 500 })
+  makeGoal({ x: 7000, y: 0 })
   Composite.add(engine.world, state.composites)
+  runner.enabled = true
 }
 
 Events.on(engine, 'collisionStart', e => {
@@ -304,18 +309,16 @@ Events.on(engine, 'collisionStart', e => {
       if (labels[0] === 'core' && labels[1] === 'guard') {
         pair.isActive = false
       }
-      if (labels[0] === 'core' && labels[1] === 'door') {
-        pair.isActive = false
-        state.actors[ids[1]].action()
-      }
       if (labels[0] === 'core' && labels[1] === 'hostile') {
         pair.isActive = false
         state.dead = true
+        runner.enabled = false
         deathDiv.style.opacity = 1
       }
       if (labels[0] === 'core' && labels[1] === 'goal') {
         pair.isActive = false
         state.levelComplete = true
+        runner.enabled = false
         levelCompleteDiv.style.opacity = 1
       }
       if (labels[0] === 'guard' && labels[1] === 'hostile') {
@@ -364,6 +367,10 @@ Events.on(render, 'afterRender', e => {
   })
 })
 
+Events.on(render, 'beforeRender', e => {
+  setupRenderBounds()
+})
+
 window.onkeydown = function (e) {
   controls.forEach(c => { if (e.key === c.key) input[c.input] = true })
   const select = e.key === 'Enter' || e.key === ' '
@@ -389,7 +396,6 @@ window.onmousemove = function (e) {
 
 window.ontouchmove = function (e) {
   e.preventDefault()
-  // e.changedTouches.forEach(touch => handleMouseEvent(touch))
   handleMouseEvent(e.touches[0])
 }
 
@@ -440,18 +446,4 @@ function setupRenderBounds () {
   Render.startViewTransform(render)
 }
 
-function update () {
-  if (!state.paused && !state.dead && !state.levelComplete) {
-    Engine.update(engine, 1000 / 60)
-  }
-}
-
-function draw () {
-  setupRenderBounds()
-  Render.world(render)
-  window.requestAnimationFrame(draw)
-}
-
 loadLevel()
-draw()
-setInterval(update, 1000 * timeStep)
