@@ -263,7 +263,7 @@ function updateGuard () {
   const guard = state.guard
   const guardPos = guard.body.position
   const corePos = state.core.body.position
-  const tension = 0.05 * clamp(0, 5, getDist(corePos, guardPos) / 1000) ** 2
+  const tension = 0.02 * clamp(0, 5, getDist(corePos, guardPos) / 1000) ** 2
   propelTowards(guard.body, state.core.body.position, tension)
   guard.trail.pop()
   guard.trail.unshift({ x: guard.body.position.x, y: guard.body.position.y })
@@ -287,7 +287,7 @@ function loadLevel () {
   Math.seedrandom(1)
   makeCore({ x: 0, y: 0 })
   makeGuard({ x: 0, y: 600 })
-  makeHostileWall({ x0: 5000, y0: 1800, x1: 5000, y1: -1800, thickness: 500 })
+  makeHostileWall({ x0: 3000, y0: 1800, x1: 3000, y1: -1800, thickness: 500 })
   makeWall({ x0: -1000, y0: -1800, x1: -1000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
   makeWall({ x0: -1000, y0: -1800, x1: 11000, y1: -1800, thickness: 1500, step: 500, noise: 100 })
   makeWall({ x0: -1000, y0: 1800, x1: 9000, y1: 1800, thickness: 1500, step: 500, noise: 100 })
@@ -351,8 +351,8 @@ Events.on(render, 'afterRender', e => {
   })
   */
   state.core.trail.forEach((point, i) => {
-    const ratio = (trailLength - i) / trailLength
-    render.context.strokeStyle = getColorString(state.core.color, 0.02 * ratio)
+    const ratio = 0.5 // (trailLength - i) / trailLength
+    render.context.strokeStyle = getColorString(state.core.color, 0.1 * ratio)
     render.context.lineTo(point.x, point.y)
     render.context.stroke()
   })
@@ -360,8 +360,8 @@ Events.on(render, 'afterRender', e => {
   render.context.beginPath()
   render.context.moveTo(state.guard.trail[0].x, state.guard.trail[0].y)
   state.guard.trail.forEach((point, i) => {
-    const ratio = (trailLength - i) / trailLength
-    render.context.strokeStyle = getColorString(state.guard.color, 0.02 * ratio)
+    const ratio = 0.5 // (trailLength - i) / trailLength
+    render.context.strokeStyle = getColorString(state.guard.color, 0.1 * ratio)
     render.context.lineTo(point.x, point.y)
     render.context.stroke()
   })
